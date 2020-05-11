@@ -19,16 +19,29 @@ namespace APIVisitPrognos
 {
     public class Startup
     {
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
+       
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name:MyAllowSpecificOrigins,
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:5555",
+                                            "http://localhost:9000")
+                                                   .AllowAnyHeader()
+                                                  .AllowAnyMethod();
+                    });
+            });
             services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseInMemoryDatabase("VisitPrognos");
@@ -49,6 +62,7 @@ namespace APIVisitPrognos
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.UseAuthorization();
 
